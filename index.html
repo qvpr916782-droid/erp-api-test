@@ -934,8 +934,49 @@
       await loadDashboard();
     }
   );
-function showAddEmployeeForm() {
-  alert("新增員工功能正常！");
+async function showAddEmployeeForm() {
+  const name = prompt("請輸入員工姓名：");
+  if (!name) return;
+
+  const department = prompt("請輸入部門：");
+  if (!department) return;
+
+  const position = prompt("請輸入職稱：");
+  if (!position) return;
+
+  const role = prompt("請輸入角色：admin / manager / employee", "employee");
+  if (!role) return;
+
+  const supervisorId = prompt("請輸入主管編號（沒有可留空）：", "");
+
+  const employee = {
+    action: "addEmployee",
+    name: name,
+    department: department,
+    position: position,
+    role: role,
+    status: "在職",
+    supervisorId: supervisorId
+  };
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify(employee)
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      alert("✅ 新增員工成功！\n員工編號：" + result.employeeId);
+      await loadEmployees();
+    } else {
+      alert("❌ 新增失敗：" + (result.message || "未知錯誤"));
+    }
+  } catch (error) {
+    console.error(error);
+    alert("❌ 新增員工失敗：" + error.message);
+  }
 }
 </script>  
 
