@@ -1,45 +1,939 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>ERP API Ping 測試</title>
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>最新公司 ERP 測試系統</title>
+
+  <!-- LINE LIFF SDK -->
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+        "Noto Sans TC", Arial, sans-serif;
+      background: #f3f6fa;
+      color: #1f2937;
+    }
+
+    header {
+      background: #0f172a;
+      color: white;
+      padding: 18px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 21px;
+    }
+
+    header p {
+      margin: 7px 0 0;
+      font-size: 13px;
+      color: #cbd5e1;
+    }
+
+    .user-card {
+      background: #172033;
+      margin-top: 14px;
+      border-radius: 12px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-card img {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: white;
+      object-fit: cover;
+    }
+
+    .user-name {
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .user-status {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 3px;
+    }
+
+    nav {
+      display: flex;
+      gap: 8px;
+      padding: 12px;
+      overflow-x: auto;
+      background: white;
+      border-bottom: 1px solid #e5e7eb;
+      position: sticky;
+      top: 119px;
+      z-index: 9;
+    }
+
+    nav button {
+      border: 0;
+      white-space: nowrap;
+      padding: 10px 15px;
+      border-radius: 20px;
+      background: #e5e7eb;
+      color: #374151;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    nav button.active {
+      background: #111827;
+      color: white;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 14px;
+      padding-bottom: 50px;
+    }
+
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    .section-title {
+      margin: 6px 0 14px;
+      font-size: 21px;
+    }
+
+    .status-box {
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: #e0f2fe;
+      color: #075985;
+      margin-bottom: 14px;
+      font-size: 14px;
+      word-break: break-word;
+    }
+
+    .error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .success {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .card {
+      background: white;
+      padding: 17px;
+      border-radius: 14px;
+      box-shadow: 0 1px 5px rgba(0,0,0,.06);
+    }
+
+    .card-label {
+      color: #64748b;
+      font-size: 13px;
+    }
+
+    .card-value {
+      margin-top: 7px;
+      font-size: 26px;
+      font-weight: 800;
+    }
+
+    .warning-card {
+      border-left: 5px solid #f59e0b;
+    }
+
+    .toolbar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    button.primary,
+    button.secondary {
+      border: 0;
+      border-radius: 9px;
+      padding: 10px 15px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    button.primary {
+      background: #0f172a;
+      color: white;
+    }
+
+    button.secondary {
+      background: #e2e8f0;
+      color: #334155;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 1px 5px rgba(0,0,0,.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+    }
+
+    th,
+    td {
+      border-bottom: 1px solid #e5e7eb;
+      padding: 12px 10px;
+      text-align: left;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    th {
+      background: #f8fafc;
+      font-weight: 800;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 20px;
+      font-size: 12px;
+      background: #e2e8f0;
+    }
+
+    .low-stock {
+      background: #fff7ed !important;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 30px;
+      color: #64748b;
+    }
+
+    footer {
+      text-align: center;
+      padding: 22px;
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    @media (min-width: 768px) {
+      .cards {
+        grid-template-columns: repeat(4, 1fr);
+      }
+
+      header {
+        padding-left: 30px;
+        padding-right: 30px;
+      }
+
+      nav {
+        padding-left: 30px;
+      }
+    }
+  </style>
 </head>
 
 <body>
-  <h1>ERP API 測試</h1>
 
-  <button onclick="testApi()">測試 API</button>
+<header>
+  <h1>最新公司 ERP 測試系統</h1>
+  <p>LINE MINI App × Google Apps Script × Google Sheets</p>
 
-  <pre id="result">尚未測試</pre>
+  <div class="user-card">
+    <img id="userPicture"
+         src="https://via.placeholder.com/80?text=LINE"
+         alt="LINE">
+    <div>
+      <div class="user-name" id="userName">LINE 使用者</div>
+      <div class="user-status" id="lineStatus">正在初始化 LINE...</div>
+    </div>
+  </div>
+</header>
 
-  <script>
-    const API_URL =
-      "https://script.google.com/macros/s/AKfycbwXWT20BvgchbJaEEwiv0H5hFaqkIboTkPNSBqJpKCxdyoHwyv1mt-5dKRAumfJageacw/exec";
+<nav>
+  <button class="active" onclick="showPage('dashboard', this)">總覽</button>
+  <button onclick="showPage('employees', this)">員工</button>
+  <button onclick="showPage('leaves', this)">請假</button>
+  <button onclick="showPage('overtimes', this)">加班</button>
+  <button onclick="showPage('inventory', this)">庫存</button>
+  <button onclick="showPage('purchases', this)">採購</button>
+  <button onclick="showPage('shippings', this)">出貨</button>
+</nav>
 
-    async function testApi() {
-      const result = document.getElementById("result");
-      result.textContent = "測試中...";
+<main>
 
-      try {
-        const response = await fetch(API_URL, {
-          method: "POST",
-          body: JSON.stringify({
-            action: "ping"
-          })
-        });
+  <div id="apiStatus" class="status-box">
+    正在連線 ERP API...
+  </div>
 
-        const text = await response.text();
+  <!-- 儀表板 -->
+  <section id="dashboard" class="page active">
+    <h2 class="section-title">總覽儀表板</h2>
 
-        result.textContent =
-          "HTTP：" + response.status + "\n\n" + text;
+    <div class="cards">
+      <div class="card">
+        <div class="card-label">員工人數</div>
+        <div id="countEmployees" class="card-value">-</div>
+      </div>
 
-      } catch (error) {
-        result.textContent =
-          "失敗 ❌\n\n" + error.toString();
+      <div class="card">
+        <div class="card-label">請假紀錄</div>
+        <div id="countLeaves" class="card-value">-</div>
+      </div>
 
-        console.error(error);
+      <div class="card">
+        <div class="card-label">加班紀錄</div>
+        <div id="countOvertimes" class="card-value">-</div>
+      </div>
+
+      <div class="card warning-card">
+        <div class="card-label">低於安全庫存</div>
+        <div id="countLowStock" class="card-value">-</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 員工 -->
+  <section id="employees" class="page">
+    <h2 class="section-title">員工資料</h2>
+    <div class="toolbar">
+      <button class="primary" onclick="loadEmployees()">重新整理</button>
+    </div>
+    <div id="employeesTable"></div>
+  </section>
+
+  <!-- 請假 -->
+  <section id="leaves" class="page">
+    <h2 class="section-title">請假申請與簽核</h2>
+    <div class="toolbar">
+      <button class="primary" onclick="loadLeaves()">重新整理</button>
+    </div>
+    <div id="leavesTable"></div>
+  </section>
+
+  <!-- 加班 -->
+  <section id="overtimes" class="page">
+    <h2 class="section-title">加班申請與簽核</h2>
+    <div class="toolbar">
+      <button class="primary" onclick="loadOvertimes()">重新整理</button>
+    </div>
+    <div id="overtimesTable"></div>
+  </section>
+
+  <!-- 庫存 -->
+  <section id="inventory" class="page">
+    <h2 class="section-title">庫存管理</h2>
+    <div class="toolbar">
+      <button class="primary" onclick="loadInventory()">重新整理</button>
+    </div>
+    <div id="inventoryTable"></div>
+  </section>
+
+  <!-- 採購 -->
+  <section id="purchases" class="page">
+    <h2 class="section-title">採購進貨</h2>
+    <div class="toolbar">
+      <button class="primary" onclick="loadPurchases()">重新整理</button>
+    </div>
+    <div id="purchasesTable"></div>
+  </section>
+
+  <!-- 出貨 -->
+  <section id="shippings" class="page">
+    <h2 class="section-title">出貨紀錄</h2>
+    <div class="toolbar">
+      <button class="primary" onclick="loadShippings()">重新整理</button>
+    </div>
+    <div id="shippingsTable"></div>
+  </section>
+
+</main>
+
+<footer>
+  ERP 測試系統 · Development Version
+</footer>
+
+<script>
+  // =========================================================
+  // 固定設定
+  // =========================================================
+
+  const LIFF_ID = "2011485985-cSOqAzNl";
+
+  const API_URL =
+    "https://script.google.com/macros/s/AKfycbxLqVcr2t75GVHuMiWjDyC3R2qvwBE-2yOPiUBF_J0dZqhGhKY8Gq_QbhW2Dt6O7ZOkng/exec";
+
+
+  // =========================================================
+  // LINE LIFF
+  // =========================================================
+
+  async function initLIFF() {
+    const lineStatus = document.getElementById("lineStatus");
+
+    try {
+      await liff.init({
+        liffId: LIFF_ID
+      });
+
+      if (!liff.isLoggedIn()) {
+        lineStatus.textContent = "尚未登入 LINE，正在登入...";
+        liff.login();
+        return;
       }
+
+      const profile = await liff.getProfile();
+
+      document.getElementById("userName").textContent =
+        profile.displayName || "LINE 使用者";
+
+      if (profile.pictureUrl) {
+        document.getElementById("userPicture").src =
+          profile.pictureUrl;
+      }
+
+      lineStatus.textContent = liff.isInClient()
+        ? "已透過 LINE MINI App 登入"
+        : "已透過 LINE 登入";
+
+      // 目前先取得 Token，但不把 Token 顯示在畫面上。
+      // 下一階段會把 ID Token 傳到 Apps Script 後端驗證。
+      const idToken = liff.getIDToken();
+
+      console.log(
+        idToken
+          ? "LINE ID Token 已取得"
+          : "尚未取得 LINE ID Token"
+      );
+
+    } catch (err) {
+      console.error(err);
+
+      lineStatus.textContent =
+        "LINE 初始化失敗：" + err.message;
     }
-  </script>
+  }
+
+
+  // =========================================================
+  // ERP API
+  // =========================================================
+
+  async function apiGet(action) {
+
+    const url =
+      API_URL +
+      "?action=" +
+      encodeURIComponent(action) +
+      "&t=" +
+      Date.now();
+
+    const response = await fetch(url, {
+      method: "GET",
+      redirect: "follow"
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        "HTTP " + response.status
+      );
+    }
+
+    return await response.json();
+  }
+
+
+  async function testAPI() {
+
+    const box =
+      document.getElementById("apiStatus");
+
+    try {
+
+      const data =
+        await apiGet("ping");
+
+      if (data.success) {
+
+        box.className =
+          "status-box success";
+
+        box.textContent =
+          "ERP API 已連線成功 ✅";
+
+      } else {
+
+        throw new Error(
+          data.message || "API 回傳失敗"
+        );
+      }
+
+    } catch (err) {
+
+      console.error(err);
+
+      box.className =
+        "status-box error";
+
+      box.textContent =
+        "ERP API 連線失敗：" +
+        err.message;
+    }
+  }
+
+
+  // =========================================================
+  // 共用工具
+  // =========================================================
+
+  function showPage(pageId, button) {
+
+    document
+      .querySelectorAll(".page")
+      .forEach(page => {
+        page.classList.remove("active");
+      });
+
+    document
+      .getElementById(pageId)
+      .classList.add("active");
+
+    document
+      .querySelectorAll("nav button")
+      .forEach(btn => {
+        btn.classList.remove("active");
+      });
+
+    button.classList.add("active");
+
+    const loaders = {
+      employees: loadEmployees,
+      leaves: loadLeaves,
+      overtimes: loadOvertimes,
+      inventory: loadInventory,
+      purchases: loadPurchases,
+      shippings: loadShippings
+    };
+
+    if (loaders[pageId]) {
+      loaders[pageId]();
+    }
+  }
+
+
+  function getArray(data) {
+
+    if (Array.isArray(data)) {
+      return data;
+    }
+
+    if (Array.isArray(data.data)) {
+      return data.data;
+    }
+
+    if (Array.isArray(data.rows)) {
+      return data.rows;
+    }
+
+    if (Array.isArray(data.items)) {
+      return data.items;
+    }
+
+    return [];
+  }
+
+
+  function escapeHTML(value) {
+
+    if (
+      value === null ||
+      value === undefined
+    ) {
+      return "";
+    }
+
+    return String(value)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+
+  function renderTable(
+    targetId,
+    data,
+    lowStockMode = false
+  ) {
+
+    const target =
+      document.getElementById(targetId);
+
+    const rows =
+      getArray(data);
+
+    if (!rows.length) {
+
+      target.innerHTML =
+        '<div class="card">目前沒有資料</div>';
+
+      return;
+    }
+
+    const headers =
+      Object.keys(rows[0]);
+
+    let html =
+      '<div class="table-wrap"><table>';
+
+    html += "<thead><tr>";
+
+    headers.forEach(header => {
+      html +=
+        "<th>" +
+        escapeHTML(header) +
+        "</th>";
+    });
+
+    html += "</tr></thead><tbody>";
+
+    rows.forEach(row => {
+
+      let lowStock = false;
+
+      if (lowStockMode) {
+
+        const current =
+          Number(
+            row["目前庫存"] ??
+            row.currentStock ??
+            row.stock ??
+            0
+          );
+
+        const safety =
+          Number(
+            row["安全庫存"] ??
+            row.safetyStock ??
+            0
+          );
+
+        lowStock =
+          current <= safety;
+      }
+
+      html +=
+        `<tr class="${lowStock ? "low-stock" : ""}">`;
+
+      headers.forEach(header => {
+
+        let value =
+          row[header];
+
+        if (
+          header.includes("狀態") &&
+          value !== undefined
+        ) {
+
+          value =
+            `<span class="badge">${escapeHTML(value)}</span>`;
+
+          html +=
+            "<td>" +
+            value +
+            "</td>";
+
+        } else {
+
+          html +=
+            "<td>" +
+            escapeHTML(value) +
+            "</td>";
+        }
+      });
+
+      html += "</tr>";
+    });
+
+    html +=
+      "</tbody></table></div>";
+
+    target.innerHTML = html;
+  }
+
+
+  function loading(targetId) {
+
+    document.getElementById(targetId).innerHTML =
+      '<div class="loading">資料載入中...</div>';
+  }
+
+
+  function loadError(targetId, err) {
+
+    document.getElementById(targetId).innerHTML =
+      '<div class="status-box error">' +
+      escapeHTML(err.message) +
+      "</div>";
+  }
+
+
+  // =========================================================
+  // 各模組讀取
+  // =========================================================
+
+  async function loadEmployees() {
+
+    loading("employeesTable");
+
+    try {
+
+      const data =
+        await apiGet("employees");
+
+      renderTable(
+        "employeesTable",
+        data
+      );
+
+      document.getElementById(
+        "countEmployees"
+      ).textContent =
+        getArray(data).length;
+
+    } catch (err) {
+
+      loadError(
+        "employeesTable",
+        err
+      );
+    }
+  }
+
+
+  async function loadLeaves() {
+
+    loading("leavesTable");
+
+    try {
+
+      const data =
+        await apiGet("leaves");
+
+      renderTable(
+        "leavesTable",
+        data
+      );
+
+      document.getElementById(
+        "countLeaves"
+      ).textContent =
+        getArray(data).length;
+
+    } catch (err) {
+
+      loadError(
+        "leavesTable",
+        err
+      );
+    }
+  }
+
+
+  async function loadOvertimes() {
+
+    loading("overtimesTable");
+
+    try {
+
+      const data =
+        await apiGet("overtimes");
+
+      renderTable(
+        "overtimesTable",
+        data
+      );
+
+      document.getElementById(
+        "countOvertimes"
+      ).textContent =
+        getArray(data).length;
+
+    } catch (err) {
+
+      loadError(
+        "overtimesTable",
+        err
+      );
+    }
+  }
+
+
+  async function loadInventory() {
+
+    loading("inventoryTable");
+
+    try {
+
+      const data =
+        await apiGet("inventory");
+
+      renderTable(
+        "inventoryTable",
+        data,
+        true
+      );
+
+      const rows =
+        getArray(data);
+
+      const lowStockCount =
+        rows.filter(row => {
+
+          const current =
+            Number(
+              row["目前庫存"] ??
+              row.currentStock ??
+              row.stock ??
+              0
+            );
+
+          const safety =
+            Number(
+              row["安全庫存"] ??
+              row.safetyStock ??
+              0
+            );
+
+          return current <= safety;
+
+        }).length;
+
+      document.getElementById(
+        "countLowStock"
+      ).textContent =
+        lowStockCount;
+
+    } catch (err) {
+
+      loadError(
+        "inventoryTable",
+        err
+      );
+    }
+  }
+
+
+  async function loadPurchases() {
+
+    loading("purchasesTable");
+
+    try {
+
+      const data =
+        await apiGet("purchases");
+
+      renderTable(
+        "purchasesTable",
+        data
+      );
+
+    } catch (err) {
+
+      loadError(
+        "purchasesTable",
+        err
+      );
+    }
+  }
+
+
+  async function loadShippings() {
+
+    loading("shippingsTable");
+
+    try {
+
+      const data =
+        await apiGet("shippings");
+
+      renderTable(
+        "shippingsTable",
+        data
+      );
+
+    } catch (err) {
+
+      loadError(
+        "shippingsTable",
+        err
+      );
+    }
+  }
+
+
+  // =========================================================
+  // 儀表板
+  // =========================================================
+
+  async function loadDashboard() {
+
+    await Promise.allSettled([
+      loadEmployees(),
+      loadLeaves(),
+      loadOvertimes(),
+      loadInventory()
+    ]);
+  }
+
+
+  // =========================================================
+  // 啟動
+  // =========================================================
+
+  document.addEventListener(
+    "DOMContentLoaded",
+    async () => {
+
+      await initLIFF();
+
+      await testAPI();
+
+      await loadDashboard();
+    }
+  );
+</script>
+
 </body>
 </html>
