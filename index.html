@@ -907,16 +907,15 @@
   // =========================================================
   // 儀表板
   // =========================================================
+async function loadDashboard() {
 
-  async function loadDashboard() {
-
-    await Promise.allSettled([
-      loadEmployees(),
-      loadLeaves(),
-      loadOvertimes(),
-      loadInventory()
-    ]);
-  }
+  await Promise.allSettled([
+    loadEmployees(),
+    loadLeaves(),
+    loadOvertimes(),
+    loadInventory()
+  ]);
+}
 
 
   // =========================================================
