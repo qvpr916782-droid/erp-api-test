@@ -354,9 +354,13 @@
   <!-- 庫存 -->
   <section id="inventory" class="page">
     <h2 class="section-title">庫存管理</h2>
-    <div class="toolbar">
-      <button class="primary" onclick="loadInventory()">重新整理</button>
-    </div>
+
+    
+      <div class="toolbar">
+  <button class="primary" onclick="showAddInventoryForm()">＋ 新增品項</button>
+  <button class="primary" onclick="loadInventory()">重新整理</button>
+</div>
+   
     <div id="inventoryTable"></div>
   </section>
 
@@ -975,6 +979,59 @@ async function showAddEmployeeForm() {
   } catch (error) {
     console.error(error);
     alert("❌ 新增員工失敗：" + error.message);
+  }
+}
+async function showAddInventoryForm() {
+  const itemId = prompt("請輸入品號，例如 P001：");
+  if (!itemId) return;
+
+  const itemName = prompt("請輸入品名：");
+  if (!itemName) return;
+
+  const category = prompt("請輸入分類：", "3C用品");
+  if (category === null) return;
+
+  const unit = prompt("請輸入單位，例如 個、盒、包：", "個");
+  if (unit === null) return;
+
+  const currentStock = prompt("請輸入目前庫存：", "0");
+  if (currentStock === null) return;
+
+  const safetyStock = prompt("請輸入安全庫存：", "10");
+  if (safetyStock === null) return;
+
+  const note = prompt("備註（沒有可留空）：", "");
+  if (note === null) return;
+
+  const inventory = {
+    action: "addInventory",
+    itemId: itemId.trim(),
+    itemName: itemName.trim(),
+    category: category.trim(),
+    unit: unit.trim(),
+    currentStock: Number(currentStock),
+    safetyStock: Number(safetyStock),
+    note: note.trim()
+  };
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      body: JSON.stringify(inventory)
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      alert("✅ 新增品項成功！\n品號：" + result.itemId);
+      await loadInventory();
+      await loadDashboard();
+    } else {
+      alert("❌ 新增失敗：" + (result.error || result.message || "未知錯誤"));
+    }
+  } catch (error) {
+    console.error(error);
+    alert("❌ 新增品項失敗：" + error.message);
   }
 }
 </script>  
